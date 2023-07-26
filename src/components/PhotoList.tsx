@@ -1,4 +1,7 @@
 import { useEffect, useState, useCallback, useRef, memo } from "react";
+import Image from "./Image";
+import Pointer from "./Pointer";
+
 
 interface Props {
   query: string;
@@ -41,6 +44,24 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
         return data;
     }, []);
 
+    const fetchMore = useCallback(() => {
+        if (!hasMore || isNextPageLoading) return;
+        setIsNextPageLoading(true);
+        fetchImages(query, color, currentPage + 1).then(data => {
+            setPhotos((prevPhotos) => prevPhotos ? [...prevPhotos, ...data.photos] : data.photos);
+            setCurrentPage((prevPage) => prevPage + 1); // increment currentPage
+            setIsNextPageLoading(false);
+            setHasMore(data.page * data.per_page < data.total_results);
+        }).catch(err => console.error('Error fetching data from Pexels API', err));
+    }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
+
+    useEffect(() => {
+        if (photos && photos.length > 0 && document.documentElement.offsetHeight <= window.innerHeight) {
+            fetchMore();
+        }
+    }, [photos, fetchMore]);
+    
+
     useEffect(() => {
         if (query === "") return;
         fetchImages(query, color, currentPage).then(data => {
@@ -56,37 +77,32 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
         }).catch(err => console.error('Error fetching data from Pexels API', err));
     
     }, [query, color, currentPage, fetchImages]);
-    
+
 
     useEffect(() => {
         const handleScroll = () => {
             if (!hasMore || isNextPageLoading) return;
             
             if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight * 0.8) {
-                setIsNextPageLoading(true);
-                fetchImages(query, color, currentPage + 1).then(data => {
-                    setPhotos((prevPhotos) => prevPhotos ? [...prevPhotos, ...data.photos] : data.photos);
-                    setCurrentPage((prevPage) => prevPage + 1); // increment currentPage
-                    setIsNextPageLoading(false);
-                    setHasMore(data.page * data.per_page < data.total_results);
-                }).catch(err => console.error('Error fetching data from Pexels API', err));                
+                fetchMore();              
             }
         };
     
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
+    }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages, fetchMore]);
+
 
     useEffect(() => {
         setPhotos(null);
     }, [query, color])
     
 
-    const handleSelectPhoto = (photo: Photo) => {
+    const handleSelectPhoto = useCallback((photo: Photo) => {
         setSelectedPhoto(photo);
-    };
+    }, []);
 
-    const scrollToPhoto = (photoIndex: number) => {
+    const scrollToPhoto = useCallback((photoIndex: number) => {
         if (photosContainerRef.current && photos) {
             const photoElements = Array.from(photosContainerRef.current.children);
             const photoElement = photoElements[photoIndex] as HTMLDivElement;
@@ -96,7 +112,31 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
                 photosContainerRef.current.scrollLeft = scrollLeft;
             }
         }
-    };
+    }, [photos]);
+
+
+    const handleClickRight = useCallback(() => {
+        if (photos && selectedPhoto) {
+            const currentIndex = photos.indexOf(selectedPhoto);
+            if (currentIndex < photos.length - 1) {
+                const nextPhoto = photos[currentIndex + 1];
+                handleSelectPhoto(nextPhoto);
+                scrollToPhoto(currentIndex + 1);
+            }
+        }
+    }, [handleSelectPhoto, photos, scrollToPhoto, selectedPhoto])
+
+
+    const handleClickLeft = useCallback(() => {
+        if (photos && selectedPhoto) {
+            const currentIndex = photos.indexOf(selectedPhoto);
+            if (currentIndex < photos.length - 1) {
+                const nextPhoto = photos[currentIndex + 1];
+                handleSelectPhoto(nextPhoto);
+                scrollToPhoto(currentIndex + 1);
+            }
+        }
+    }, [handleSelectPhoto, photos, scrollToPhoto, selectedPhoto])
 
 
     return (
@@ -108,16 +148,9 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
             }
             <div className="flex items-center">
             {(hasMore && selectedPhoto) && (
-                <button className='h-1/6 border-4 p-4 px-5 m-4 rounded-full hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={() => {
-                    if (photos && selectedPhoto) {
-                        const currentIndex = photos.indexOf(selectedPhoto);
-                        if (currentIndex > 0) {
-                            const prevPhoto = photos[currentIndex - 1];
-                            handleSelectPhoto(prevPhoto);
-                            scrollToPhoto(currentIndex - 1);
-                        }
-                    }
-                }}>&#8592;</button>
+                <Pointer handleClick={handleClickLeft}>
+                    &#8592;
+                </Pointer>
             )}
             {selectedPhoto && (
                 <div className="h-96 w-96 flex justify-center items-center my-10">
@@ -125,27 +158,19 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
                 </div>
             )}
             {(hasMore && selectedPhoto) && (
-                <button className='h-1/6 border-4 p-4 px-5 m-4 rounded-full hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={() => {
-                    if (photos && selectedPhoto) {
-                        const currentIndex = photos.indexOf(selectedPhoto);
-                        if (currentIndex < photos.length - 1) {
-                            const nextPhoto = photos[currentIndex + 1];
-                            handleSelectPhoto(nextPhoto);
-                            scrollToPhoto(currentIndex + 1);
-                        }
-                    }
-                }}>&#8594;</button>
+                <Pointer handleClick={handleClickRight}>
+                    &#8594;
+                </Pointer>
             )}
             </div>
             <div className="h-2/6 w-1/2 flex items-center justify-center w-full">
                 <div ref={photosContainerRef} className="flex w-10/12 flex-wrap justify-center">
                     {photos && photos.map((photo) => (
-                        <img
-                            className="m-1"
+                        <Image
                             src={photo.src.small}
                             alt={photo.url}
-                            key={photo.id}
-                            onClick={() => handleSelectPhoto(photo)}
+                            photo={photo}
+                            handleClick={() => handleSelectPhoto(photo)}
                         />
                     ))}
                 </div>
