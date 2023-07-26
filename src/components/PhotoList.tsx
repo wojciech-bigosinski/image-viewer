@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, memo } from "react";
 
 interface Props {
   query: string;
@@ -14,7 +14,7 @@ interface Photo {
   };
 }
 
-const PhotoList = function PhotoList({ query, color }: Props) {
+const PhotoList = memo(function PhotoList({ query, color }: Props) {
     const [photos, setPhotos] = useState<Photo[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -78,7 +78,7 @@ const PhotoList = function PhotoList({ query, color }: Props) {
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
 
     useEffect(() => {
-        setPhotos(null)
+        setPhotos(null);
     }, [query, color])
     
 
@@ -152,6 +152,6 @@ const PhotoList = function PhotoList({ query, color }: Props) {
             </div>
         </div>
     );
-}
+})
 
 export default PhotoList;

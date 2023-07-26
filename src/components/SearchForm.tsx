@@ -1,12 +1,12 @@
 // Form.tsx
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { HexColorPicker } from "react-colorful";
 
 interface Props {
     onSearch: (query: string, color: string) => void;
 }
 
-const Form: React.FC<Props> = ({ onSearch }) => {
+const Form: React.FC<Props> = memo(function Form({ onSearch }) {
   const [query, setQuery] = useState<string>("");
   const [color, setColor] = useState<string>("");
 
@@ -35,7 +35,7 @@ const Form: React.FC<Props> = ({ onSearch }) => {
             <div className='flex flex-col mt-4 lg:mt-0 lg:flex-row items-center'>
                 <label className='ml-6 mr-3'>Color to focus on:</label>
                 <HexColorPicker color={color} onChange={setColor} />
-                <p className='ml-2'>or maybe <button className='border-2 p-2 rounded hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={handleChange}>none</button>?</p>
+                <p className='ml-2'>or maybe <button className='border-2 p-2 rounded mt-4 lg:mt-0 hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={handleChange}>none</button>?</p>
             </div>
         </div>
         <div className='mt-4'>
@@ -43,6 +43,6 @@ const Form: React.FC<Props> = ({ onSearch }) => {
         </div>
     </form>
   );
-};
+});
 
 export default Form;
