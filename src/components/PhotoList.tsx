@@ -76,6 +76,10 @@ const PhotoList = function PhotoList({ query, color }: Props) {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
+
+    useEffect(() => {
+        setPhotos(null)
+    }, [query, color])
     
 
     const handleSelectPhoto = (photo: Photo) => {
