@@ -16,7 +16,7 @@ interface Photo {
 
 const PhotoList = function PhotoList({ query, color }: Props) {
     const [photos, setPhotos] = useState<Photo[] | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [hasMore, setHasMore] = useState<boolean>(true);
@@ -25,6 +25,7 @@ const PhotoList = function PhotoList({ query, color }: Props) {
     const photosContainerRef = useRef<HTMLDivElement>(null);
 
     const fetchImages = useCallback(async (query: string, color: string, page: number) => {
+        setIsLoading(true);
         const response = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=20&page=${page}&color=${color.slice(1)}`, {
             headers: {
                 Authorization: "api key",
@@ -41,8 +42,7 @@ const PhotoList = function PhotoList({ query, color }: Props) {
     }, []);
 
     useEffect(() => {
-        setIsLoading(true);
-    
+        if (query === "") return;
         fetchImages(query, color, currentPage).then(data => {
             setPhotos(prevPhotos => {
                 const updatedPhotos = prevPhotos ? [...prevPhotos, ...data.photos] : data.photos;
@@ -61,7 +61,7 @@ const PhotoList = function PhotoList({ query, color }: Props) {
     useEffect(() => {
         const handleScroll = () => {
             if (!hasMore || isNextPageLoading) return;
-    
+            
             if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight * 0.8) {
                 setIsNextPageLoading(true);
                 fetchImages(query, color, currentPage + 1).then(data => {
@@ -98,18 +98,17 @@ const PhotoList = function PhotoList({ query, color }: Props) {
         }
     };
 
-    // if (isLoading && query !== "") {
-    //     return <div>Loading...</div>;
-    // }
-    // else if (isLoading) {
-    //     return <></>;
-    // }
 
     return (
         <div className="h-full flex flex-col justify-center items-center">
+            {isLoading ? 
+            <div className="fixed bottom-2 right-2 bg-black text-white p-6 rounded-lg opacity-75 transition-opacity ease-in-out duration-1000 scale-100">Loading...</div>
+            : 
+            <></>
+            }
             <div className="flex items-center">
-            {hasMore && (
-                <button className='h-1/6 border-4 p-4 px-5 m-4 rounded hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={() => {
+            {(hasMore && selectedPhoto) && (
+                <button className='h-1/6 border-4 p-4 px-5 m-4 rounded-full hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={() => {
                     if (photos && selectedPhoto) {
                         const currentIndex = photos.indexOf(selectedPhoto);
                         if (currentIndex > 0) {
@@ -125,8 +124,8 @@ const PhotoList = function PhotoList({ query, color }: Props) {
                     <img className="max-h-[120%]" src={selectedPhoto.src.large} alt={selectedPhoto.url}/>
                 </div>
             )}
-            {hasMore && (
-                <button className='h-1/6 border-4 p-4 px-5 m-4 rounded hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={() => {
+            {(hasMore && selectedPhoto) && (
+                <button className='h-1/6 border-4 p-4 px-5 m-4 rounded-full hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={() => {
                     if (photos && selectedPhoto) {
                         const currentIndex = photos.indexOf(selectedPhoto);
                         if (currentIndex < photos.length - 1) {

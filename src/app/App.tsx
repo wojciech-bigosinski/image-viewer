@@ -11,7 +11,6 @@ function App() {
   const handleSearch = useCallback((searchQuery: string, searchColor: string) => {
     setQuery(searchQuery);
     setColor(searchColor);
-    console.log(searchColor)
   }, []);
 
   return (

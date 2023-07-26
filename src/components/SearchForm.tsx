@@ -12,9 +12,12 @@ const Form: React.FC<Props> = ({ onSearch }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(color)
     onSearch(query, color);
   };
+
+  const handleChange = (e: React.MouseEvent) => {
+    setColor("");
+  }
 
   return (
     <form className='h-4/12 flex flex-col items-center text-xl border rounded px-4 py-8 m-4' onSubmit={handleSubmit}>
@@ -32,6 +35,7 @@ const Form: React.FC<Props> = ({ onSearch }) => {
             <div className='flex flex-col mt-4 lg:mt-0 lg:flex-row items-center'>
                 <label className='ml-6 mr-3'>Color to focus on:</label>
                 <HexColorPicker color={color} onChange={setColor} />
+                <p className='ml-2'>or maybe <button className='border-2 p-2 rounded hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={handleChange}>none</button>?</p>
             </div>
         </div>
         <div className='mt-4'>
