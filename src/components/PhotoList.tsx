@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback, useRef, memo } from "react";
 import Image from "./Image";
 import Pointer from "./Pointer";
 import SelectedPhoto from "./SelectedPhoto";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 interface Props {
@@ -41,7 +43,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
 
         if (!data || !data.photos) {
             console.error('Error: API response is missing photos');
-            throw new Error('API response is missing photos');
+            toast.error("Error: API response is missing photos");
         }
 
         if (data.total_results === 0) {
@@ -63,7 +65,10 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
             setIsNextPageLoading(false);
             setHasMore(data.page * data.per_page < data.total_results);
             setIsLoading(false);
-        }).catch(err => console.error('Error fetching data from Pexels API', err));
+        }).catch(err => {
+            console.error('Error fetching data from Pexels API', err);
+            toast.error("API error");
+        });
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
 
     useEffect(() => {
@@ -92,7 +97,10 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
             });
             setIsLoading(false);
             setHasMore(data.page * data.per_page < data.total_results);
-        }).catch(err => console.error('Error fetching data from Pexels API', err));
+        }).catch(err => {
+            console.error('Error fetching data from Pexels API', err);
+            toast.error("API error");
+        });
     
     }, [query, color, fetchImages]);
 
@@ -155,44 +163,47 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
     
 
     return (
-        <div className="flex flex-col justify-center items-center">
-            {noResults ?
-            <div>No results</div> : <></>}
-            {isLoading ? 
-            <div className="fixed bottom-2 md:right-2 bg-black text-white p-6 rounded-lg opacity-75 transition-opacity ease-in-out duration-1000 scale-100">Loading...</div>
-            : 
-            <></>
-            }
-            <div className="flex items-center">
-            {(hasMore && selectedPhoto) && (
-                <Pointer handleClick={handleClickLeft}>
-                    <div className='h-0 w-0 border-y-8 border-y-transparent border-r-[16px] border-r-slate-600'/>
-                </Pointer>
-            )}
-            {selectedPhoto && (
-                <SelectedPhoto src={selectedPhoto.src.large} alt={selectedPhoto.url}/>
-            )}
-            {(hasMore && selectedPhoto) && (
-                <Pointer handleClick={handleClickRight}>
-                    <div className='h-0 w-0 border-y-8 border-y-transparent border-l-[16px] border-l-slate-600'/>
-                </Pointer>
-            )}
-            </div>
-            <div className="h-2/6 w-1/2 flex items-center justify-center w-full">
-                <div ref={photosContainerRef} className="flex w-10/12 flex-wrap justify-center">
-                    {photos && photos.map((photo, index) => (
-                        <Image
-                            src={photo.src.small}
-                            alt={photo.url}
-                            photo={photo}
-                            key={index}
-                            selected={index === selectedPhotoIndex ? true : false}
-                            handleClick={() => handleSelectPhoto(photo, index)}
-                        />
-                    ))}
+        <>
+            <ToastContainer />
+            <div className="flex flex-col justify-center items-center">
+                {noResults ?
+                <div>No results</div> : <></>}
+                {isLoading ? 
+                <div className="fixed bottom-2 md:right-2 bg-black text-white p-6 rounded-lg opacity-75 transition-opacity ease-in-out duration-1000 scale-100">Loading...</div>
+                : 
+                <></>
+                }
+                <div className="flex items-center">
+                {(hasMore && selectedPhoto) && (
+                    <Pointer handleClick={handleClickLeft}>
+                        <div className='h-0 w-0 border-y-8 border-y-transparent border-r-[16px] border-r-slate-600'/>
+                    </Pointer>
+                )}
+                {selectedPhoto && (
+                    <SelectedPhoto src={selectedPhoto.src.large} alt={selectedPhoto.url}/>
+                )}
+                {(hasMore && selectedPhoto) && (
+                    <Pointer handleClick={handleClickRight}>
+                        <div className='h-0 w-0 border-y-8 border-y-transparent border-l-[16px] border-l-slate-600'/>
+                    </Pointer>
+                )}
+                </div>
+                <div className="h-2/6 w-1/2 flex items-center justify-center w-full">
+                    <div ref={photosContainerRef} className="flex w-10/12 flex-wrap justify-center">
+                        {photos && photos.map((photo, index) => (
+                            <Image
+                                src={photo.src.small}
+                                alt={photo.url}
+                                photo={photo}
+                                key={index}
+                                selected={index === selectedPhotoIndex ? true : false}
+                                handleClick={() => handleSelectPhoto(photo, index)}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 })
 
