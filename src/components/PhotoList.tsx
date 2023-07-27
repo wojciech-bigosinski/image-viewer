@@ -62,6 +62,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
             setCurrentPage((prevPage) => prevPage + 1); // increment currentPage
             setIsNextPageLoading(false);
             setHasMore(data.page * data.per_page < data.total_results);
+            setIsLoading(false);
         }).catch(err => console.error('Error fetching data from Pexels API', err));
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
 
