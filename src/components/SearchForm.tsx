@@ -1,4 +1,3 @@
-// Form.tsx
 import { useState, memo } from 'react';
 import { HexColorPicker } from "react-colorful";
 
@@ -6,7 +5,7 @@ interface Props {
     onSearch: (query: string, color: string) => void;
 }
 
-const Form: React.FC<Props> = memo(function Form({ onSearch }) {
+const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
   const [query, setQuery] = useState<string>("");
   const [color, setColor] = useState<string>("");
 

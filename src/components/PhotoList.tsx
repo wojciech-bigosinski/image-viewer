@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef, memo } from "react";
 import Image from "./Image";
 import Pointer from "./Pointer";
+import SelectedPhoto from "./SelectedPhoto";
 
 
 interface Props {
@@ -17,19 +18,22 @@ interface Photo {
   };
 }
 
-const PhotoList = memo(function PhotoList({ query, color }: Props) {
+const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
+    const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number>(0);
     const [photos, setPhotos] = useState<Photo[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [hasMore, setHasMore] = useState<boolean>(true);
-    const [isNextPageLoading, setIsNextPageLoading] = useState(false);
+    const [isNextPageLoading, setIsNextPageLoading] = useState<boolean>(false);
+    const [noResults, setNoResults] = useState<boolean>(false);
 
     const photosContainerRef = useRef<HTMLDivElement>(null);
 
     const fetchImages = useCallback(async (query: string, color: string, page: number) => {
         setIsLoading(true);
-        const response = await fetch(`https://api.pexels.com/v1/search?query=${query}&per_page=20&page=${page}&color=${color.slice(1)}`, {
+
+        const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=20&page=${page}&color=${color.slice(1)}`, {
             headers: {
                 Authorization: "api key",
             },
@@ -39,6 +43,13 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
         if (!data || !data.photos) {
             console.error('Error: API response is missing photos');
             throw new Error('API response is missing photos');
+        }
+
+        if (data.total_results === 0) {
+            setNoResults(true);
+        }
+        else {
+            setNoResults(false);
         }
 
         return data;
@@ -98,9 +109,11 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
     }, [query, color])
     
 
-    const handleSelectPhoto = useCallback((photo: Photo) => {
+    const handleSelectPhoto = useCallback((photo: Photo, index: number) => {
         setSelectedPhoto(photo);
+        setSelectedPhotoIndex(index);
     }, []);
+    
 
     const scrollToPhoto = useCallback((photoIndex: number) => {
         if (photosContainerRef.current && photos) {
@@ -120,27 +133,33 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
             const currentIndex = photos.indexOf(selectedPhoto);
             if (currentIndex < photos.length - 1) {
                 const nextPhoto = photos[currentIndex + 1];
-                handleSelectPhoto(nextPhoto);
+                handleSelectPhoto(nextPhoto, currentIndex + 1);
                 scrollToPhoto(currentIndex + 1);
+                
+                if (photos.length - currentIndex <= 5) {
+                    fetchMore();
+                }
             }
         }
-    }, [handleSelectPhoto, photos, scrollToPhoto, selectedPhoto])
-
-
+    }, [handleSelectPhoto, photos, scrollToPhoto, selectedPhoto, fetchMore])    
+    
     const handleClickLeft = useCallback(() => {
         if (photos && selectedPhoto) {
             const currentIndex = photos.indexOf(selectedPhoto);
-            if (currentIndex < photos.length - 1) {
-                const nextPhoto = photos[currentIndex + 1];
-                handleSelectPhoto(nextPhoto);
-                scrollToPhoto(currentIndex + 1);
+            if (currentIndex > 0) {
+                const prevPhoto = photos[currentIndex - 1];
+                handleSelectPhoto(prevPhoto, currentIndex - 1);
+                scrollToPhoto(currentIndex - 1);
             }
         }
     }, [handleSelectPhoto, photos, scrollToPhoto, selectedPhoto])
+    
 
 
     return (
-        <div className="h-full flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center">
+            {noResults ?
+            <div>No results</div> : <></>}
             {isLoading ? 
             <div className="fixed bottom-2 right-2 bg-black text-white p-6 rounded-lg opacity-75 transition-opacity ease-in-out duration-1000 scale-100">Loading...</div>
             : 
@@ -149,28 +168,27 @@ const PhotoList = memo(function PhotoList({ query, color }: Props) {
             <div className="flex items-center">
             {(hasMore && selectedPhoto) && (
                 <Pointer handleClick={handleClickLeft}>
-                    &#8592;
+                    <div className='h-0 w-0 border-y-8 border-y-transparent border-r-[16px] border-r-slate-600'/>
                 </Pointer>
             )}
             {selectedPhoto && (
-                <div className="h-96 w-96 flex justify-center items-center my-10">
-                    <img className="max-h-[120%]" src={selectedPhoto.src.large} alt={selectedPhoto.url}/>
-                </div>
+                <SelectedPhoto src={selectedPhoto.src.large} alt={selectedPhoto.url}/>
             )}
             {(hasMore && selectedPhoto) && (
                 <Pointer handleClick={handleClickRight}>
-                    &#8594;
+                    <div className='h-0 w-0 border-y-8 border-y-transparent border-l-[16px] border-l-slate-600'/>
                 </Pointer>
             )}
             </div>
             <div className="h-2/6 w-1/2 flex items-center justify-center w-full">
                 <div ref={photosContainerRef} className="flex w-10/12 flex-wrap justify-center">
-                    {photos && photos.map((photo) => (
+                    {photos && photos.map((photo, index) => (
                         <Image
                             src={photo.src.small}
                             alt={photo.url}
                             photo={photo}
-                            handleClick={() => handleSelectPhoto(photo)}
+                            selected={index === selectedPhotoIndex ? true : false}
+                            handleClick={() => handleSelectPhoto(photo, index)}
                         />
                     ))}
                 </div>

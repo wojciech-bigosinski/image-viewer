@@ -1,8 +1,7 @@
-// App.tsx
 import { useCallback, useState } from 'react';
 import Form from '../components/SearchForm';
 import PhotoList from '../components/PhotoList';
-import { Footer } from "../components/Footer";
+
 
 function App() {
   const [query, setQuery] = useState<string>("");
@@ -17,7 +16,6 @@ function App() {
     <div className='min-h-screen flex flex-col justify-center items-center'>
       <Form onSearch={handleSearch} />
       <PhotoList query={query} color={color} />
-      <Footer/>
     </div>
   );
 }
