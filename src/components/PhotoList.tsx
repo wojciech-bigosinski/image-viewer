@@ -32,7 +32,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
 
     const fetchImages = useCallback(async (query: string, color: string, page: number) => {
         setIsLoading(true);
-
         const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=20&page=${page}&color=${color.slice(1)}`, {
             headers: {
                 Authorization: String(process.env.REACT_APP_KEY),
@@ -67,6 +66,14 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages]);
 
     useEffect(() => {
+        setCurrentPage(1);
+        setHasMore(true);
+        setPhotos(null);
+        setSelectedPhotoIndex(0);
+        setSelectedPhoto(null);
+    }, [query, color])
+
+    useEffect(() => {
         if (photos && photos.length > 0 && document.documentElement.offsetHeight <= window.innerHeight) {
             fetchMore();
         }
@@ -74,7 +81,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
     
     useEffect(() => {
         if (query === "") return;
-        fetchImages(query, color, currentPage).then(data => {
+        fetchImages(query, color, 1).then(data => {
             setPhotos(prevPhotos => {
                 const updatedPhotos = prevPhotos ? [...prevPhotos, ...data.photos] : data.photos;
                 if (!prevPhotos) {  // This is the first load
@@ -86,7 +93,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
             setHasMore(data.page * data.per_page < data.total_results);
         }).catch(err => console.error('Error fetching data from Pexels API', err));
     
-    }, [query, color, currentPage, fetchImages]);
+    }, [query, color, fetchImages]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -100,11 +107,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages, fetchMore]);
-
-    useEffect(() => {
-        setPhotos(null);
-        setSelectedPhotoIndex(0);
-    }, [query, color])
     
 
     const handleSelectPhoto = useCallback((photo: Photo, index: number) => {
@@ -150,7 +152,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
         }
     }, [handleSelectPhoto, photos, scrollToPhoto, selectedPhoto])
     
-
 
     return (
         <div className="flex flex-col justify-center items-center">
