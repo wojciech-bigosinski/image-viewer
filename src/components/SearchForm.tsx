@@ -7,6 +7,9 @@ import { selectColor } from "../redux/slices/searchSlice";
 import { setQueryRedux } from '../redux/slices/searchSlice';
 import { setColorRedux } from '../redux/slices/searchSlice';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 interface Props {
     onSearch: (query: string, color: string) => void;
@@ -24,6 +27,7 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query === "") {
+      toast.error("There must be an object to search for!")
       return;
     }
     onSearch(query, color);
@@ -31,6 +35,7 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
 
   return (
     <>
+      <ToastContainer />
       <form className='h-4/12 flex flex-col items-center text-xl border rounded px-4 py-8 m-4' onSubmit={handleSubmit}>
           <div className='flex flex-col lg:flex-row items-center justify-center flex-wrap'>
               <div className='flex flex-col lg:flex-row items-center'>

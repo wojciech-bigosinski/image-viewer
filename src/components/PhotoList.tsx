@@ -182,6 +182,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
                             src={photo.src.small}
                             alt={photo.url}
                             photo={photo}
+                            key={index}
                             selected={index === selectedPhotoIndex ? true : false}
                             handleClick={() => handleSelectPhoto(photo, index)}
                         />
