@@ -103,6 +103,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
 
     useEffect(() => {
         setPhotos(null);
+        setSelectedPhotoIndex(0);
     }, [query, color])
     
 
