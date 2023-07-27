@@ -159,7 +159,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
             {noResults ?
             <div>No results</div> : <></>}
             {isLoading ? 
-            <div className="fixed bottom-2 right-2 bg-black text-white p-6 rounded-lg opacity-75 transition-opacity ease-in-out duration-1000 scale-100">Loading...</div>
+            <div className="fixed bottom-2 md:right-2 bg-black text-white p-6 rounded-lg opacity-75 transition-opacity ease-in-out duration-1000 scale-100">Loading...</div>
             : 
             <></>
             }
