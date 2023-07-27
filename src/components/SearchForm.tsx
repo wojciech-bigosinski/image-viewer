@@ -23,6 +23,9 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (query === "") {
+      return;
+    }
     onSearch(query, color);
   };
 
@@ -38,7 +41,8 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
                       value={query} 
                       onChange={(e) => {
                         setQuery(e.target.value);
-                        dispatch(setQueryRedux(e.target.value));
+                        if (e.target.value === "") dispatch(setQueryRedux("no query!"));
+                        else dispatch(setQueryRedux(e.target.value));
                       }} 
                       placeholder="Search photos..." 
                   />

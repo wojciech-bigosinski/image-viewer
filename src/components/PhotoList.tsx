@@ -72,7 +72,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
         }
     }, [photos, fetchMore]);
     
-
     useEffect(() => {
         if (query === "") return;
         fetchImages(query, color, currentPage).then(data => {
@@ -89,7 +88,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
     
     }, [query, color, currentPage, fetchImages]);
 
-
     useEffect(() => {
         const handleScroll = () => {
             if (!hasMore || isNextPageLoading) return;
@@ -103,7 +101,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [hasMore, isNextPageLoading, query, color, currentPage, fetchImages, fetchMore]);
 
-
     useEffect(() => {
         setPhotos(null);
     }, [query, color])
@@ -113,7 +110,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
         setSelectedPhoto(photo);
         setSelectedPhotoIndex(index);
     }, []);
-    
 
     const scrollToPhoto = useCallback((photoIndex: number) => {
         if (photosContainerRef.current && photos) {
@@ -126,7 +122,6 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
             }
         }
     }, [photos]);
-
 
     const handleClickRight = useCallback(() => {
         if (photos && selectedPhoto) {
