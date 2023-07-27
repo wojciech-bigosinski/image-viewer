@@ -1,3 +1,17 @@
+# Image Viewer
+## Prerequisites
+1. Install nodejs.
+2. Clone the project.
+3. In the root of the project create an .env with your pexels key.
+See .env.example.
+4. Run `npm install`
+5. Run `npm start`
+
+## Using the app
+You will need to input an object to search for. \
+You can also choose the dominating color to filter by it! \
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
