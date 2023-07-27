@@ -23,7 +23,6 @@ const Image: React.FC<Props> = memo(({src, alt, photo, selected, handleClick}: P
             className={selected ? "border-4 border border-orange-600" : "m-1"}
             src={src}
             alt={alt}
-            style={{"contentVisibility": "auto"}}
             onClick={() => handleClick(photo)}
         />
     );
