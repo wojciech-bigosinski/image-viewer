@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useEffect, useCallback } from 'react';
 import { HexColorPicker } from "react-colorful";
 import { useAppSelector } from "../redux/hooks";
 import { useAppDispatch } from "../redux/hooks";
@@ -24,14 +24,28 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
 
   const dispatch = useAppDispatch();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (query === "") {
       toast.error("There must be an object to search for!")
       return;
     }
     onSearch(query, color);
-  };
+  }, [color, onSearch, query]);
+
+  useEffect(() => {
+    const handleEnterKey = (e: KeyboardEvent) => {
+      if (e.code === 'Enter') {
+        handleSubmit(e as any);
+      }
+    };
+
+    window.addEventListener('keydown', handleEnterKey);
+
+    return () => {
+      window.removeEventListener('keydown', handleEnterKey);
+    };
+  }, [query, color, handleSubmit]);
 
   return (
     <>
@@ -58,7 +72,7 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
                     setColor(e);
                     dispatch(setColorRedux(e));
                   }} />
-                  <p className='ml-2'>or maybe <button className='border-2 p-2 rounded mt-4 lg:mt-0 hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={(e) => {
+                  <p className='ml-2'>or maybe <button className='border-2 p-2 rounded mt-4 mr-2 lg:mt-0 hover:bg-slate-200 focus:ring focus:ring-slate-300' onClick={(e) => {
                     e.preventDefault();
                     setColor("");
                     dispatch(setColorRedux("no color selected!"));
@@ -71,9 +85,9 @@ const Form: React.FC<Props> = memo(({ onSearch }: Props) => {
       </form>
       <div className='flex flex-col lg:flex-row justify-between items-center min-w-1/6 space-x-2 mb-4'>
         <div>Current query:</div>
-        <div className='border-2 p-2 rounded text-xl'>{queryRedux}</div>
+        <div className='p-2 rounded text-xl bg-slate-200'>{queryRedux}</div>
         <div>Current color:</div>
-        <div className='border-2 p-2 rounded text-xl'>{colorRedux}</div>
+        <div className='p-2 rounded text-xl bg-slate-200'>{colorRedux}</div>
       </div>
     </>
   );
