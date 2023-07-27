@@ -35,7 +35,7 @@ const PhotoList: React.FC<Props> = memo(({ query, color }: Props) => {
 
         const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=20&page=${page}&color=${color.slice(1)}`, {
             headers: {
-                Authorization: "api key",
+                Authorization: String(process.env.KEY),
             },
         });
         const data = await response.json();
